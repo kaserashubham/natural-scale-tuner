@@ -14,6 +14,7 @@
   const centsValue = $("centsValue");
   const directionLabel = $("directionLabel");
   const needle = $("needle");
+  const gaugeHint = $("gaugeHint");
   const ratioRows = $("ratioRows");
 
   let audioContext = null;
@@ -22,7 +23,6 @@
   let source = null;
   let rafId = null;
   let sampleBuffer = null;
-  let lastGoodFrequency = 0;
   let smoothedFrequency = 0;
 
   function updateRootFrequency() {
@@ -60,7 +60,8 @@
     targetFrequency.textContent = "—";
     centsValue.textContent = "—";
     directionLabel.textContent = "cents";
-    needle.style.left = "50%";
+    gaugeHint.textContent = "Play a steady note";
+    needle.style.transform = "translateX(-50%) rotate(0deg)";
   }
 
   // YIN-style difference function with cumulative mean normalisation.
@@ -111,7 +112,6 @@
       if (bestValue > 0.35) return null;
     }
 
-    // Parabolic interpolation improves precision between sample lags.
     const left = cmnd[tauEstimate - 1] ?? cmnd[tauEstimate];
     const centre = cmnd[tauEstimate];
     const right = cmnd[tauEstimate + 1] ?? centre;
@@ -135,8 +135,9 @@
     const cents = Math.max(-50, Math.min(50, match.cents));
     centsValue.textContent = (match.cents > 0 ? "+" : "") + match.cents.toFixed(1);
     directionLabel.textContent = Math.abs(match.cents) < 1.5 ? "in tune" : match.cents < 0 ? "cents flat" : "cents sharp";
-    needle.style.left = ((cents + 50) / 100 * 100) + "%";
-    lastGoodFrequency = smoothedFrequency;
+    gaugeHint.textContent = Math.abs(match.cents) < 1.5 ? "JUST IN TUNE" : match.cents < 0 ? "BELOW TARGET" : "ABOVE TARGET";
+    const angle = (cents / 50) * 82;
+    needle.style.transform = "translateX(-50%) rotate(" + angle + "deg)";
   }
 
   function loop() {
@@ -160,8 +161,6 @@
       return;
     }
     try {
-      // First request preferred raw-ish audio settings. Some devices reject
-      // constraints they do not support, so retry with the browser defaults.
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           audio: {
