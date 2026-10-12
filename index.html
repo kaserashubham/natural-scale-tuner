@@ -13,7 +13,7 @@
     <header class="topbar">
       <div class="brand-mark" aria-hidden="true">♪</div>
       <div><p class="eyebrow">PURE INTERVALS · LIVE AUDIO</p><h1>Natural Scale Tuner</h1></div>
-      <span class="version">v0.1</span>
+      <span class="version">v0.2</span>
     </header>
 
     <section class="intro">
@@ -47,16 +47,35 @@
       <div class="live-heading"><h2 id="live-title">Live tuner</h2><span id="statusPill" class="status-pill">Microphone off</span></div>
       <div class="readout">
         <div class="note-readout"><span class="eyebrow">NEAREST JUST-INTONATION NOTE</span><div id="noteName" class="note-name">—</div><div id="intervalName" class="interval-name">Play a steady note</div></div>
-        <div class="frequency-readout"><span class="eyebrow">DETECTED FREQUENCY</span><div><strong id="detectedFrequency">—</strong><span> Hz</span></div><p>Target: <strong id="targetFrequency">—</strong> Hz</p></div>
+        <div class="frequency-readout"><span class="eyebrow">TARGET FREQUENCY</span><div><strong id="targetFrequency">—</strong><span> Hz</span></div><p>Pitch difference from target</p></div>
       </div>
-      <div class="meter-wrap" role="img" aria-label="Pitch deviation meter">
-        <div class="meter-labels"><span>♭ Flat</span><span>In tune</span><span>♯ Sharp</span></div>
-        <div class="meter" id="meter">
-          <div class="meter-zone left-zone"></div><div class="meter-zone right-zone"></div><div class="meter-center"></div>
+
+      <div class="meter-wrap">
+        <div class="meter-labels"><span>♭ Flat</span><span class="center-label">Just in tune</span><span>♯ Sharp</span></div>
+        <div class="meter" id="meter" role="img" aria-label="Pitch deviation gauge, from flat through just in tune to sharp">
+          <svg class="gauge-arc" viewBox="0 0 320 180" aria-hidden="true">
+            <path class="arc-track" d="M 26 158 A 134 134 0 0 1 294 158" />
+            <path class="arc-flat" d="M 26 158 A 134 134 0 0 1 94 42" />
+            <path class="arc-tune" d="M 94 42 A 134 134 0 0 1 226 42" />
+            <path class="arc-sharp" d="M 226 42 A 134 134 0 0 1 294 158" />
+            <g class="gauge-ticks">
+              <path d="M 26 158 l 12 -2" /><path d="M 42 91 l 11 5" />
+              <path d="M 91 42 l 7 10" /><path d="M 160 24 l 0 13" />
+              <path d="M 229 42 l -7 10" /><path d="M 278 91 l -11 5" />
+              <path d="M 294 158 l -12 -2" />
+            </g>
+          </svg>
           <div id="needle" class="needle"></div>
+          <div class="gauge-hub"></div>
+          <div class="gauge-center-readout">
+            <span class="eyebrow">YOUR PITCH</span>
+            <div class="gauge-frequency"><strong id="detectedFrequency">—</strong><span>Hz</span></div>
+            <div id="gaugeHint" class="gauge-hint">Play a steady note</div>
+          </div>
         </div>
         <div class="deviation"><strong id="centsValue">—</strong><span id="directionLabel">cents</span></div>
       </div>
+
       <div class="controls">
         <button id="startButton" class="primary-button">Enable microphone</button>
         <button id="stopButton" class="secondary-button" disabled>Stop</button>
