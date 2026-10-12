@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="A microphone-based Just Intonation tuner.">
+  <title>Natural Scale Tuner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true">♪</div>
+      <div><p class="eyebrow">PURE INTERVALS · LIVE AUDIO</p><h1>Natural Scale Tuner</h1></div>
+      <span class="version">v0.1</span>
+    </header>
+
+    <section class="intro">
+      <p>Find your pitch against a root note using Just Intonation ratios—not equal temperament.</p>
+    </section>
+
+    <section class="panel setup-panel" aria-labelledby="setup-title">
+      <h2 id="setup-title">Reference setup</h2>
+      <div class="settings-grid">
+        <label>Root note
+          <select id="rootNote">
+            <option>C</option><option>C#</option><option>D</option><option>D#</option>
+            <option>E</option><option>F</option><option>F#</option><option>G</option>
+            <option>G#</option><option>A</option><option>A#</option><option>B</option>
+          </select>
+        </label>
+        <label>Octave
+          <select id="rootOctave">
+            <option value="2">2</option><option value="3">3</option><option value="4" selected>4</option>
+            <option value="5">5</option><option value="6">6</option>
+          </select>
+        </label>
+        <label class="root-frequency">Root frequency (Hz)
+          <input id="rootFrequency" type="number" min="20" max="20000" step="0.001" value="261.626">
+        </label>
+      </div>
+      <p class="hint">The root frequency is editable. Changing the note or octave loads its standard reference frequency; you can then calibrate it to your instrument or tanpura.</p>
+    </section>
+
+    <section class="panel tuner-panel" aria-labelledby="live-title">
+      <div class="live-heading"><h2 id="live-title">Live tuner</h2><span id="statusPill" class="status-pill">Microphone off</span></div>
+      <div class="readout">
+        <div class="note-readout"><span class="eyebrow">NEAREST JUST-INTONATION NOTE</span><div id="noteName" class="note-name">—</div><div id="intervalName" class="interval-name">Play a steady note</div></div>
+        <div class="frequency-readout"><span class="eyebrow">DETECTED FREQUENCY</span><div><strong id="detectedFrequency">—</strong><span> Hz</span></div><p>Target: <strong id="targetFrequency">—</strong> Hz</p></div>
+      </div>
+      <div class="meter-wrap" role="img" aria-label="Pitch deviation meter">
+        <div class="meter-labels"><span>♭ Flat</span><span>In tune</span><span>♯ Sharp</span></div>
+        <div class="meter" id="meter">
+          <div class="meter-zone left-zone"></div><div class="meter-zone right-zone"></div><div class="meter-center"></div>
+          <div id="needle" class="needle"></div>
+        </div>
+        <div class="deviation"><strong id="centsValue">—</strong><span id="directionLabel">cents</span></div>
+      </div>
+      <div class="controls">
+        <button id="startButton" class="primary-button">Enable microphone</button>
+        <button id="stopButton" class="secondary-button" disabled>Stop</button>
+      </div>
+      <p id="message" class="message" aria-live="polite">Allow microphone access when your browser asks. For reliable microphone access, open this page from localhost or an HTTPS website.</p>
+    </section>
+
+    <section class="panel scale-panel">
+      <div class="live-heading"><h2>Reference ratios</h2><span class="small-label">5-limit chromatic set</span></div>
+      <p class="hint">Targets are calculated relative to your selected root. These are one useful 5-limit chromatic mapping; Just Intonation has multiple valid variants depending on musical context.</p>
+      <div class="table-scroll"><table><thead><tr><th>Interval</th><th>Ratio</th><th>Target (Hz)</th></tr></thead><tbody id="ratioRows"></tbody></table></div>
+    </section>
+    <footer>Audio is processed locally in your browser. No microphone recording is uploaded.</footer>
+  </main>
+  <script src="justIntonation.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
