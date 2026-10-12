@@ -160,10 +160,21 @@
       return;
     }
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-        video: false
-      });
+      // First request preferred raw-ish audio settings. Some devices reject
+      // constraints they do not support, so retry with the browser defaults.
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: { ideal: false },
+            noiseSuppression: { ideal: false },
+            autoGainControl: { ideal: false }
+          },
+          video: false
+        });
+      } catch (preferredError) {
+        console.warn("Preferred microphone settings failed; retrying with default audio settings.", preferredError);
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      }
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       audioContext = new AudioContextClass();
       if (audioContext.state === "suspended") await audioContext.resume();
@@ -181,9 +192,23 @@
       message.textContent = "Microphone active. Play or sing one steady note, and keep background noise low.";
       loop();
     } catch (error) {
-      message.textContent = error.name === "NotAllowedError"
-        ? "Microphone permission was denied. Allow microphone access in your browser settings and try again."
-        : "Could not start the microphone: " + error.message;
+      if (stream) stream.getTracks().forEach((track) => track.stop());
+      stream = null;
+      if (audioContext && audioContext.state !== "closed") await audioContext.close().catch(() => {});
+      audioContext = null; analyser = null; source = null; sampleBuffer = null;
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      statusPill.textContent = "Microphone off";
+      statusPill.classList.remove("active");
+      const hints = {
+        NotAllowedError: "Microphone permission was denied. Allow microphone access for this site in Chrome settings, then reload.",
+        NotFoundError: "No microphone was found. Connect or enable a microphone, then check your operating system input settings.",
+        OverconstrainedError: "The selected microphone cannot satisfy the requested settings. Check your input device and try again.",
+        NotReadableError: "The microphone is busy or unavailable. Close apps using it (such as a meeting app) and retry.",
+        SecurityError: "Microphone access is blocked in this context. Open the app on localhost or through HTTPS."
+      };
+      message.textContent = (hints[error.name] || "Could not start the microphone: " + error.message) +
+        " (" + error.name + ")";
     }
   }
 
